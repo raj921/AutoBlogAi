@@ -1,0 +1,19 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "codeconnections:UseConnection",
+        "codeconnections:GetConnection",
+        "codeconnections:ListConnections",
+        "codeconnections:PassConnection",
+        "codestar-connections:UseConnection",
+        "codestar-connections:GetConnection",
+        "codestar-connections:ListConnections",
+        "codestar-connections:PassConnection"
+      ],
+      "Resource": "arn:aws:codeconnections:ap-south-1:257394487466:connection/2853e025-2832-47d6-8f95-4f5527bb0740"
+    }
+  ]
+}

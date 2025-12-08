@@ -2,28 +2,32 @@ version: 0.2
 
 env:
   variables:
+    # Override in the build environment if needed
+    AWS_DEFAULT_REGION: ap-south-1
     IMAGE_TAG: latest
+    IMAGE_REPO_NAME_BACKEND: autoblog-backend
+    IMAGE_REPO_NAME_FRONTEND: autoblog-frontend
   exported-variables:
     - IMAGE_TAG
 
 phases:
   pre_build:
     commands:
+      - echo Resolving AWS account and region...
+      - ACCOUNT_ID=${AWS_ACCOUNT_ID:-$(aws sts get-caller-identity --query Account --output text)}
+      - AWS_REGION=${AWS_REGION:-$AWS_DEFAULT_REGION}
+      - REGISTRY=$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+      - BACKEND_URI=$REGISTRY/$IMAGE_REPO_NAME_BACKEND
+      - FRONTEND_URI=$REGISTRY/$IMAGE_REPO_NAME_FRONTEND
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-      - BACKEND_URI=$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/autoblog-backend
-      - FRONTEND_URI=$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/autoblog-frontend
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $REGISTRY
 
   build:
     commands:
       - echo Building backend...
-      - cd backend
-      - docker build -t $BACKEND_URI:$IMAGE_TAG .
-      - cd ..
+      - docker build -t $BACKEND_URI:$IMAGE_TAG backend
       - echo Building frontend...
-      - cd frontend
-      - docker build -t $FRONTEND_URI:$IMAGE_TAG .
-      - cd ..
+      - docker build -t $FRONTEND_URI:$IMAGE_TAG frontend
 
   post_build:
     commands:
